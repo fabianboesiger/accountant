@@ -1,0 +1,9 @@
+[package]
+name = "shared"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+rust_decimal = "1.16"
+chrono = "0.4"
+sqlx = { version = "0.5", features = ["runtime-tokio-rustls", "postgres", "decimal", "chrono"] }
