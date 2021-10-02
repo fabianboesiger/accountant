@@ -19,7 +19,7 @@ pub struct Trade {
     pub size: Decimal,
     pub price: Decimal,
     pub date: DateTime<Utc>,
-    pub trader: String,
+    pub bot: String,
 }
 
 pub type PositionId = i64;

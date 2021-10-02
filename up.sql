@@ -2,6 +2,10 @@ DROP TABLE pairs;
 DROP TABLE positions;
 DROP TABLE trades;
 
+DELETE FROM pairs;
+DELETE FROM positions;
+DELETE FROM trades;
+
 CREATE TYPE side AS ENUM ('BUY', 'SELL');
 
 CREATE TABLE trades (

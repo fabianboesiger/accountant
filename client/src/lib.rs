@@ -1,16 +1,17 @@
 use std::sync::Arc;
-
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use async_trait::async_trait;
 use shared::{Side, TradeId, PositionId, PairId};
 use sqlx::PgPool;
 
+pub use shared;
+
 #[async_trait]
 pub trait Trade: Send + Sync + 'static {
-    fn exchange(&self) -> String;
-    fn market(&self) -> String;
-    fn bot(&self) -> String;
+    fn exchange(&self) -> &str;
+    fn market(&self) -> &str;
+    fn bot(&self) -> &str;
     fn size(&self) -> Decimal;
     fn price(&self) -> Decimal;
     fn side(&self) -> Side;
@@ -37,6 +38,36 @@ pub trait Trade: Send + Sync + 'static {
     }
 }
 
+impl Trade for shared::Trade {
+    fn exchange(&self) -> &str {
+        &self.exchange
+    }
+
+    fn market(&self) -> &str {
+        &self.market
+    }
+
+    fn bot(&self) -> &str {
+        &self.bot
+    }
+
+    fn size(&self) -> Decimal {
+        self.size
+    }
+
+    fn price(&self) -> Decimal {
+        self.price
+    }
+
+    fn side(&self) -> Side {
+        self.side
+    }
+
+    fn date(&self) -> DateTime<Utc> {
+        self.date
+    }
+}
+
 #[async_trait]
 pub trait Position<T>: Send + Sync + 'static
 where
@@ -45,33 +76,7 @@ where
     fn enter(&self) -> T;
     fn exit(&self) -> T;
 
-    fn exchange(&self) -> String {
-        let enter = self.enter().exchange();
-        let exit = self.exit().exchange();
-        assert_eq!(enter, exit);
-        enter
-    }
-
-    fn market(&self) -> String {
-        let enter = self.enter().market();
-        let exit = self.exit().market();
-        assert_eq!(enter, exit);
-        enter
-    }
-
-    fn bot(&self) -> String {
-        let enter = self.enter().bot();
-        let exit = self.exit().bot();
-        assert_eq!(enter, exit);
-        enter
-    }
-
     async fn insert(&self, pool: Arc<PgPool>) -> sqlx::Result<PositionId> {
-        // Assertions.
-        self.exchange();
-        self.market();
-        self.bot();
-
         let enter_id = self.enter().insert(pool.clone()).await?;
         let exit_id = self.exit().insert(pool.clone()).await?;
         
@@ -96,20 +101,10 @@ where
     P: Position<T>,
     T: Trade,
 {
-    fn long(&self) -> P;
-    fn short(&self) -> P;
-
-    fn bot(&self) -> String {
-        let long = self.long().bot();
-        let short = self.short().bot();
-        assert_eq!(long, short);
-        long
-    }
+    fn long(&self) -> &P;
+    fn short(&self) -> &P;
 
     async fn insert(&self, pool: Arc<PgPool>) -> sqlx::Result<PairId> {
-        // Assertions.
-        self.bot();
-
         let long_id = self.long().insert(pool.clone()).await?;
         let short_id = self.short().insert(pool.clone()).await?;
         
