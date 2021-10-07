@@ -7,7 +7,6 @@ edition = "2018"
 shared = { path = "../shared" }
 rust_decimal = "1.16"
 chrono = "0.4"
-async-trait = "0.1"
-dotenv = "0.15"
-tokio = { version = "1.12", features = ["full"] }
-sqlx = { version = "0.5", features = [ "runtime-tokio-rustls", "postgres", "decimal", "chrono" ] }
+tokio = { version = "1.12", features = ["rt", "net", "sync", "time"] }
+log = "0.4"
+bincode = "1.3"

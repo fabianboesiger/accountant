@@ -1,11 +1,14 @@
+/* Drop all tables */
+DROP TABLE payments;
+DROP TABLE accounts;
+DROP TYPE payment_type;
+
 DROP TABLE pairs;
 DROP TABLE positions;
 DROP TABLE trades;
+DROP TYPE side;
 
-DELETE FROM pairs;
-DELETE FROM positions;
-DELETE FROM trades;
-
+/* Init database */
 CREATE TYPE side AS ENUM ('BUY', 'SELL');
 
 CREATE TABLE trades (
@@ -31,6 +34,21 @@ CREATE TABLE pairs (
     short BIGINT NOT NULL REFERENCES positions(id)
 );
 
-INSERT INTO trades (exchange, market, side, size, price, date, bot)
-VALUES ('1', '2', 'BUY', 0, 0, NOW(), 'c')
-RETURNING id;
+CREATE TABLE accounts (
+    id BIGSERIAL PRIMARY KEY,
+    full_name VARCHAR(32) NOT NULL,
+    balance DECIMAL NOT NULL,
+    fee DECIMAL NOT NULL
+);
+
+CREATE TYPE payment_type AS ENUM ('TRANSFER', 'INVESTMENT', 'FEE');
+
+CREATE TABLE payments (
+    id BIGSERIAL PRIMARY KEY,
+    account BIGINT NOT NULL REFERENCES accounts(id),
+    amount DECIMAL NOT NULL,
+    date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    payment_type payment_type NOT NULL
+);
+
+
